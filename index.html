@@ -13,24 +13,31 @@
         body { font-family: 'Inter', sans-serif; background-color: #fcfcfd; color: #1e293b; }
         .font-serif { font-family: 'Playfair Display', serif; }
         
-        /* EXECUTIVE INTELLIGENCE RENDERER */
-        .ai-content { display: flex; flex-direction: column; gap: 1.5rem; }
-        .ai-content h2 { font-family: 'Playfair Display', serif; color: #0f172a; font-size: 1.8rem; margin-top: 1rem; border-bottom: 2px solid #f1f5f9; padding-bottom: 0.5rem; }
-        .ai-content h3 { font-weight: 800; color: #d97706; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; display: flex; align-items: center; gap: 0.5rem; }
+        /* --- EXECUTIVE RENDERER ENGINE --- */
+        .ai-content { display: flex; flex-direction: column; gap: 1.25rem; }
+        .ai-content h2 { font-family: 'Playfair Display', serif; color: #0f172a; font-size: 1.8rem; margin-top: 1.5rem; border-bottom: 2px solid #f1f5f9; padding-bottom: 0.5rem; }
+        .ai-content h3 { font-weight: 800; color: #d97706; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.1em; display: flex; align-items: center; gap: 0.5rem; margin-top: 1rem; }
+        .ai-content h4 { font-weight: 700; color: #0f172a; font-size: 1.1rem; margin-top: 0.5rem; }
         .ai-content p { line-height: 1.8; font-size: 1rem; color: #334155; }
         
-        .strategy-card { background: #fff; border: 1px solid #e2e8f0; border-left: 4px solid #d97706; padding: 1.5rem; border-radius: 0.75rem; margin: 0.5rem 0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03); }
+        /* TABLE STYLING */
+        .ai-table-container { overflow-x: auto; margin: 1rem 0; border-radius: 12px; border: 1px solid #e2e8f0; background: white; }
+        .ai-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
+        .ai-table th { background: #f8fafc; padding: 12px 16px; font-weight: 700; color: #475569; border-bottom: 2px solid #e2e8f0; }
+        .ai-table td { padding: 12px 16px; border-bottom: 1px solid #f1f5f9; color: #334155; vertical-align: top; }
         
-        .ai-content ul { display: flex; flex-direction: column; gap: 0.75rem; }
-        .ai-content li { position: relative; padding-left: 1.5rem; line-height: 1.6; color: #475569; }
-        .ai-content li::before { content: '→'; position: absolute; left: 0; color: #d97706; font-weight: bold; }
+        /* STRATEGY BLOCKS */
+        .strategy-card { background: #fff; border: 1px solid #e2e8f0; border-left: 5px solid #d97706; padding: 1.75rem; border-radius: 0.75rem; margin: 1rem 0; box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.05); }
+        .impact-label { font-weight: 800; font-size: 0.75rem; text-transform: uppercase; color: #d97706; display: block; margin-bottom: 2px; }
+        .impact-value { display: block; margin-bottom: 12px; font-size: 0.95rem; line-height: 1.6; }
         
+        /* SOURCE TAGS & HIGHLIGHTS */
         .source-tag { background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 700; font-size: 0.7rem; border: 1px solid #e2e8f0; text-transform: uppercase; }
-        .highlight { color: #0f172a; font-weight: 700; background: linear-gradient(120deg, rgba(217, 119, 6, 0.08) 0%, rgba(217, 119, 6, 0.08) 100%); background-repeat: no-repeat; background-size: 100% 0.4em; background-position: 0 90%; }
+        .highlight { font-weight: 700; color: #0f172a; background: linear-gradient(120deg, rgba(217, 119, 6, 0.12) 0%, rgba(217, 119, 6, 0.12) 100%); background-repeat: no-repeat; background-size: 100% 0.4em; background-position: 0 90%; }
         
-        /* SIDEBAR MONITOR WIDGETS */
-        .monitor-item { background: rgba(30, 41, 59, 0.4); border-radius: 12px; padding: 12px; border: 1px solid rgba(255,255,255,0.05); }
-        .sparkline { height: 20px; width: 60px; fill: none; stroke: #d97706; stroke-width: 2; }
+        /* SIDEBAR MONITOR */
+        .monitor-item { background: rgba(30, 41, 59, 0.6); border-radius: 12px; padding: 12px; border: 1px solid rgba(255,255,255,0.05); }
+        .sparkline { height: 18px; width: 60px; fill: none; stroke: #d97706; stroke-width: 2.5; stroke-linecap: round; }
         
         @keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in { animation: fade-in 0.4s ease-out forwards; }
@@ -50,34 +57,37 @@
         const SYSTEM_PROMPT = `
             You are the "Entrepreneur Knowledge Ecosystem" Agent for AGGP_SA. 
             Ground all insights in GEM 2023/24 and StatsSA QLFS Q4 data.
-            Use Markdown formatting: ## for Sections, ### for Actionable Programs.
-            Bold critical numbers. 
-            Structure output as: 1. Executive Diagnostic, 2. Evidence Corpus, 3. Strategic Response.
+            Format rules:
+            - Use ## for Executive Diagnostic and major sections.
+            - Use ### for Program Names.
+            - Use #### for Sub-strategies.
+            - Use | for Tables.
+            - Format strategic details as: "Intervention: [Text]", "KPIs: [Text]", "Focus Area: [Text]".
+            - Bold (**text**) critical statistics.
         `;
 
-        // --- STABLE SVGS ---
+        // --- SVGS ---
         const Icons = {
             Zap: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
             Lock: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
             Shield: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>,
             Layers: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>,
             Chart: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>,
-            Check: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
             Target: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="2"/></svg>
         };
 
         // --- SUB-COMPONENTS ---
-        const MonitorWidget = ({ label, value, trend }) => (
+        const MonitorWidget = ({ label, value, trend, status = "NOMINAL" }) => (
             <div className="monitor-item space-y-2">
                 <div className="flex justify-between items-center">
-                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{label}</span>
-                    <span className="text-xs text-amber-500 font-bold">{value}</span>
+                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{label}</span>
+                    <span className="text-[10px] text-emerald-400 font-black tracking-widest">{status}</span>
                 </div>
                 <div className="flex items-end justify-between">
+                    <span className="text-sm text-white font-bold">{value}</span>
                     <svg className="sparkline" viewBox="0 0 60 20">
                         <polyline points={trend} />
                     </svg>
-                    <span className="text-[9px] bg-emerald-500/10 text-emerald-400 px-1 rounded">SAFE</span>
                 </div>
             </div>
         );
@@ -85,61 +95,77 @@
         const FormattedAIResponse = ({ text }) => {
             const lines = text.split('\n');
             let content = [];
-            let currentList = [];
-            let inStrategy = false;
-            let strategyLines = [];
+            let inTable = false;
+            let tableRows = [];
+            let currentStrategy = null;
 
-            const flushList = (key) => {
-                if (currentList.length > 0) {
-                    content.push(<ul key={`list-${key}`}>{currentList}</ul>);
-                    currentList = [];
-                }
-            };
-
-            const flushStrategy = (key) => {
-                if (inStrategy) {
-                    content.push(<div key={`strat-${key}`} className="strategy-card animate-fade-in">{strategyLines}</div>);
-                    strategyLines = [];
-                    inStrategy = false;
+            const flushTable = (key) => {
+                if (inTable && tableRows.length > 0) {
+                    const headers = tableRows[0];
+                    const body = tableRows.slice(2); // Skip separator row
+                    content.push(
+                        <div key={`table-${key}`} className="ai-table-container">
+                            <table className="ai-table">
+                                <thead><tr>{headers.map((h, i) => <th key={i}>{h}</th>)}</tr></thead>
+                                <tbody>{body.map((row, i) => <tr key={i}>{row.map((cell, j) => <td key={j}>{cell}</td>)}</tr>)}</tbody>
+                            </table>
+                        </div>
+                    );
+                    tableRows = [];
+                    inTable = false;
                 }
             };
 
             lines.forEach((line, i) => {
                 const trimmed = line.trim();
+                
+                // --- Table Logic ---
+                if (trimmed.startsWith('|')) {
+                    inTable = true;
+                    const cells = trimmed.split('|').filter(c => c.trim() !== '').map(c => c.trim());
+                    tableRows.push(cells);
+                    return;
+                } else if (inTable) { flushTable(i); }
+
+                // --- Header & Strategy Logic ---
                 if (trimmed.startsWith('## ')) {
-                    flushList(i); flushStrategy(i);
                     content.push(<h2 key={i}>{trimmed.replace('## ', '')}</h2>);
                 } else if (trimmed.startsWith('### ')) {
-                    flushList(i); flushStrategy(i);
-                    inStrategy = true;
-                    strategyLines.push(<h3 key={`h3-${i}`}><Icons.Target /> {trimmed.replace('### ', '')}</h3>);
+                    content.push(<h3 key={i}><Icons.Target /> {trimmed.replace('### ', '')}</h3>);
+                } else if (trimmed.startsWith('#### ')) {
+                    content.push(<h4 key={i}>{trimmed.replace('#### ', '')}</h4>);
+                } else if (trimmed.startsWith('Intervention:') || trimmed.startsWith('KPIs:') || trimmed.startsWith('Focus Area:')) {
+                    const [label, ...val] = trimmed.split(':');
+                    content.push(
+                        <div key={i} className="strategy-card animate-fade-in">
+                            <span className="impact-label">{label}</span>
+                            <span className="impact-value">{val.join(':').trim()}</span>
+                        </div>
+                    );
                 } else if (trimmed.startsWith('* ') || trimmed.startsWith('- ')) {
-                    const item = trimmed.substring(2).split(/(\*\*.*?\*\*)/g).map((p, j) => p.startsWith('**') ? <span key={j} className="highlight">{p.replace(/\*\*/g, '')}</span> : p);
-                    if (inStrategy) strategyLines.push(<li key={`li-${i}`}>{item}</li>);
-                    else currentList.push(<li key={`li-${i}`}>{item}</li>);
-                } else if (trimmed === '---' || trimmed === '***') {
-                    flushList(i); flushStrategy(i);
-                    content.push(<hr key={i} className="my-6 border-slate-200" />);
+                    content.push(<li key={i} className="ml-4 list-none relative pl-6 before:content-['→'] before:absolute before:left-0 before:text-amber-600 before:font-bold mb-2 text-slate-600 leading-relaxed">{
+                        trimmed.substring(2).split(/(\*\*.*?\*\*)/g).map((p, j) => p.startsWith('**') ? <span key={j} className="highlight">{p.replace(/\*\*/g, '')}</span> : p)
+                    }</li>);
                 } else if (trimmed !== '') {
-                    const proc = line.split(/(\*\*.*?\*\*|GEM \d{4}\/\d{2}|StatsSA QLFS Q\d)/g).map((p, j) => {
+                    const processed = line.split(/(\*\*.*?\*\*|GEM \d{4}\/\d{2}|StatsSA QLFS Q\d)/g).map((p, j) => {
                         if (p.startsWith('**')) return <span key={j} className="highlight">{p.replace(/\*\*/g, '')}</span>;
                         if (/GEM|StatsSA|QLFS/.test(p)) return <span key={j} className="source-tag mx-1">{p}</span>;
                         return p;
                     });
-                    if (inStrategy) strategyLines.push(<p key={`p-${i}`}>{proc}</p>);
-                    else { flushList(i); content.push(<p key={i}>{proc}</p>); }
+                    content.push(<p key={i}>{processed}</p>);
                 }
             });
-            flushList('f'); flushStrategy('f');
+
+            flushTable('final');
             return <div className="ai-content">{content}</div>;
         };
 
-        // --- MAIN APP ---
+        // --- MAIN APPLICATION ---
         function App() {
             const [isAuthorized, setIsAuthorized] = useState(false);
             const [authInput, setAuthInput] = useState('');
             const [activeTab, setActiveTab] = useState('chat');
-            const [messages, setMessages] = useState([{ role: 'assistant', text: "## Ecosystem Synchronized\nGrounding modules (GEM/StatsSA) are active. Integrity oversight: NOMINAL. How can I assist, Remon?", status: 'verified' }]);
+            const [messages, setMessages] = useState([{ role: 'assistant', text: "## Ecosystem Synchronized\nGrounding modules (GEM/StatsSA) are active. Governance layers: NOMINAL. How can I assist your diagnostic, Remon?", status: 'verified' }]);
             const [input, setInput] = useState('');
             const [loading, setLoading] = useState(false);
             const chatEndRef = useRef(null);
@@ -149,12 +175,12 @@
             const handleAuth = (e) => {
                 e.preventDefault();
                 if (authInput.toUpperCase() === ACCESS_CODE) setIsAuthorized(true);
-                else alert("Access Denied.");
+                else alert("Invalid Access Code.");
             };
 
             const handleSend = async () => {
                 if (!input.trim() || loading) return;
-                const key = API_KEY_ENC || window.prompt("Security Check: Enter API Key.");
+                const key = API_KEY_ENC || window.prompt("Security Check: Enter Gemini API Key.");
                 if (!key) return;
                 setMessages(prev => [...prev, { role: 'user', text: input }]);
                 setInput(''); setLoading(true);
@@ -166,19 +192,19 @@
                     });
                     const data = await res.json();
                     setMessages(prev => [...prev, { role: 'assistant', text: data.candidates[0].content.parts[0].text, status: 'verified' }]);
-                } catch (e) { setMessages(prev => [...prev, { role: 'assistant', text: "Sync Error. Check Key.", status: 'error' }]); }
+                } catch (e) { setMessages(prev => [...prev, { role: 'assistant', text: "Diagnostic Error. Check connectivity.", status: 'error' }]); }
                 finally { setLoading(false); }
             };
 
             if (!isAuthorized) {
                 return (
-                    <div className="h-screen bg-[#0f172a] flex items-center justify-center p-6 text-center font-sans">
-                        <div className="max-w-md w-full space-y-8">
+                    <div className="h-screen bg-[#0f172a] flex items-center justify-center p-6 text-center">
+                        <div className="max-w-md w-full space-y-8 animate-fade-in">
                             <div className="inline-block bg-[#d97706] p-4 rounded-2xl shadow-2xl mb-4"><Icons.Zap /></div>
                             <h1 className="text-white text-3xl font-serif">Entrepreneur Knowledge<br/>Ecosystem</h1>
-                            <p className="text-slate-400 text-sm">Gated Portal for AGGP_SA Learning & Innovation Leadership.</p>
+                            <p className="text-slate-400 text-sm">Gated Diagnostic Portal for AGGP_SA Leadership.</p>
                             <form onSubmit={handleAuth} className="space-y-4">
-                                <input type="password" value={authInput} onChange={(e) => setAuthInput(e.target.value)} placeholder="Access Code..." className="w-full bg-slate-800 border border-slate-700 rounded-xl py-4 text-white text-center tracking-widest outline-none focus:ring-2 focus:ring-[#d97706]" />
+                                <input type="password" value={authInput} onChange={(e) => setAuthInput(e.target.value)} placeholder="Access Code..." className="w-full bg-slate-800 border border-slate-700 rounded-xl py-4 text-white text-center tracking-widest outline-none focus:ring-2 focus:ring-[#d97706] transition-all" />
                                 <button className="w-full bg-[#d97706] text-white font-bold py-4 rounded-xl shadow-lg hover:bg-amber-500">Initialize Ecosystem</button>
                             </form>
                         </div>
@@ -188,14 +214,14 @@
 
             return (
                 <div className="flex h-screen overflow-hidden bg-[#fcfcfd]">
-                    {/* --- SIDEBAR --- */}
-                    <aside className="w-80 bg-[#0f172a] text-white flex flex-col p-8 shrink-0 shadow-2xl z-20 overflow-y-auto">
+                    {/* --- SIDEBAR: GOVERNANCE & MONITORS --- */}
+                    <aside className="w-80 bg-[#0f172a] text-white flex flex-col p-8 shrink-0 shadow-2xl z-20">
                         <div className="flex items-center gap-3 mb-10">
                             <div className="bg-[#d97706] p-2 rounded"><Icons.Zap /></div>
                             <h1 className="text-xs font-bold tracking-[0.2em] leading-tight text-[#d97706]">ENTREPRENEUR KNOWLEDGE<br/>ECOSYSTEM</h1>
                         </div>
 
-                        <nav className="space-y-2 mb-10">
+                        <nav className="space-y-2 mb-8">
                             <button onClick={() => setActiveTab('chat')} className={`w-full flex items-center gap-3 p-4 rounded-xl transition-all ${activeTab === 'chat' ? 'bg-[#d97706] text-white shadow-lg' : 'text-slate-400 hover:bg-slate-800'}`}>
                                 <Icons.Shield /> <span className="text-sm font-bold">Intelligence Interface</span>
                             </button>
@@ -204,26 +230,25 @@
                             </button>
                         </nav>
 
-                        {/* --- OVERSIGHT MONITOR (AIGP/ISO) --- */}
-                        <div className="space-y-4 border-t border-slate-800 pt-6">
-                            <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-                                <Icons.Chart /> Governance Monitor (v3.4)
+                        <div className="space-y-4 pt-6 border-t border-slate-800">
+                            <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                <Icons.Chart /> AIGP/ISO Monitor (v3.5)
                             </h4>
-                            <MonitorWidget label="Ecosystem Fairness" value="94.2%" trend="0,18 10,12 20,15 30,8 40,10 50,5 60,7" />
-                            <MonitorWidget label="Data Integrity" value="99.8%" trend="0,5 10,6 20,5 30,5 40,5 50,4 60,5" />
-                            <MonitorWidget label="POPIA Compliance" value="100%" trend="0,2 10,2 20,2 30,2 40,2 50,2 60,2" />
-                            <p className="text-[9px] text-slate-500 italic mt-4">Monitoring adheres to ISO 42001 and AIGP ethical frameworks.</p>
+                            <MonitorWidget label="Data Integrity" value="99.98%" trend="0,15 10,12 20,14 30,5 40,8 50,2 60,4" />
+                            <MonitorWidget label="Algorithmic Fairness" value="96.4%" trend="0,5 10,6 20,4 30,7 40,3 50,5 60,6" />
+                            <MonitorWidget label="Privacy Compliance" value="100%" trend="0,2 10,2 20,2 30,2 40,2 50,2 60,2" />
+                            <p className="text-[9px] text-slate-500 italic mt-4 leading-relaxed">System oversight follows ISO 42001 and POPIA ethical guidelines.</p>
                         </div>
 
                         <div className="mt-auto pt-8 border-t border-slate-800">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded bg-[#d97706] flex items-center justify-center font-serif italic text-white shadow-xl">RG</div>
-                                <div><p className="text-xs font-bold text-slate-200 uppercase">Remon Geyser</p><p className="text-[10px] text-[#d97706] font-bold">AI STRATEGY ARCHITECT</p></div>
+                                <div><p className="text-xs font-bold text-slate-200 uppercase">Remon Geyser</p><p className="text-[10px] text-[#d97706] font-bold uppercase">AI Strategy Architect</p></div>
                             </div>
                         </div>
                     </aside>
 
-                    {/* --- MAIN --- */}
+                    {/* --- MAIN INTERFACE --- */}
                     <main className="flex-1 flex flex-col bg-[#f8fafc] overflow-hidden">
                         <header className="h-16 bg-white border-b border-slate-100 flex items-center px-8 justify-between shadow-sm">
                             <div className="flex items-center gap-2 text-[10px] font-bold uppercase text-slate-500 tracking-widest">
@@ -231,7 +256,7 @@
                                 Ecosystem Status: <span className="text-emerald-600">Nominal Alignment</span>
                             </div>
                             <div className="text-[10px] font-bold uppercase text-slate-400 flex items-center gap-2">
-                                <Icons.Shield /> AIGP Secure Tunnel
+                                <Icons.Shield /> Secure AIGP Connection
                             </div>
                         </header>
 
@@ -245,26 +270,35 @@
                                             }`}>
                                                 {msg.role === 'assistant' ? <FormattedAIResponse text={msg.text} /> : msg.text}
                                                 {msg.status === 'verified' && (
-                                                    <div className="mt-8 pt-4 border-t border-slate-100 text-[9px] font-black text-[#d97706] uppercase flex items-center gap-2 tracking-[0.2em]">
-                                                        <Icons.Check /> Research Grounding: ISO 42001 Protocol Verified
+                                                    <div className="mt-8 pt-4 border-t border-slate-100 text-[10px] font-bold text-[#d97706] uppercase flex items-center gap-2 tracking-[0.2em]">
+                                                        <Icons.Shield /> ISO 42001 Protocol Verified
                                                     </div>
                                                 )}
                                             </div>
                                         </div>
                                     ))}
-                                    {loading && <div className="text-[10px] text-slate-400 animate-pulse font-bold uppercase tracking-[0.2em] text-center">Synthesizing Ecosystem Logic...</div>}
+                                    {loading && (
+                                        <div className="flex flex-col items-center gap-3 py-8 text-slate-400">
+                                            <div className="flex gap-1">
+                                                <div className="w-2 h-2 bg-amber-600 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                                                <div className="w-2 h-2 bg-amber-600 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                                                <div className="w-2 h-2 bg-amber-600 rounded-full animate-bounce"></div>
+                                            </div>
+                                            <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Synthesizing Ecosystem Wisdom...</span>
+                                        </div>
+                                    )}
                                     <div ref={chatEndRef} />
                                 </div>
                             ) : (
                                 <div className="max-w-5xl mx-auto space-y-12">
                                     <div>
-                                        <h2 className="text-4xl font-serif text-[#0f172a] mb-2 leading-tight">Knowledge Corpus</h2>
+                                        <h2 className="text-4xl font-serif text-[#0f172a] mb-2 leading-tight">Knowledge Library</h2>
                                         <p className="text-slate-500 font-medium">The foundational evidence base for AGGP_SA ecosystem innovation.</p>
                                     </div>
                                     <div className="grid grid-cols-2 gap-8">
-                                        <KnowledgeBlock title="GEM SA 2023/24" type="PDF Module" meta="98% Vector Coverage" />
-                                        <KnowledgeBlock title="StatsSA QLFS Q4" type="Structured Dataset" meta="Live BigQuery Link" />
-                                        <KnowledgeBlock title="AGGP Internal 21-24" type="Philanthropic Impact" meta="POPIA Masked" />
+                                        <KnowledgeBlock title="GEM SA 2023/24" type="PDF Module" meta="98% Grounding Integrity" />
+                                        <KnowledgeBlock title="StatsSA QLFS Q4" type="Structured Dataset" meta="Real-time Census Feed" />
+                                        <KnowledgeBlock title="AGGP Impact 21-24" type="Philanthropic Outcomes" meta="POPIA Masked" />
                                         <div className="border-2 border-dashed border-slate-200 rounded-[2rem] p-10 flex flex-col items-center justify-center text-slate-400 hover:border-amber-600/50 transition-all cursor-pointer bg-slate-50/50">
                                             <Icons.Layers />
                                             <span className="text-[10px] font-black uppercase tracking-widest mt-2">Connect Dataset</span>
@@ -275,9 +309,9 @@
                         </div>
 
                         {activeTab === 'chat' && (
-                            <div className="p-8 bg-white border-t border-slate-100">
+                            <div className="p-8 bg-white border-t border-slate-100 shadow-[0_-4px_12px_rgba(0,0,0,0.02)]">
                                 <div className="max-w-4xl mx-auto flex gap-4">
-                                    <input className="flex-1 border border-slate-200 rounded-2xl py-5 px-8 focus:ring-4 focus:ring-[#d97706]/10 outline-none transition-all shadow-sm text-slate-800 placeholder:text-slate-400" placeholder="Enter diagnostic query (e.g., Provincial TEA risk comparison)..." value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSend()} disabled={loading} />
+                                    <input className="flex-1 border border-slate-200 rounded-2xl py-5 px-8 focus:ring-4 focus:ring-[#d97706]/10 outline-none transition-all shadow-sm text-slate-800 placeholder:text-slate-400 font-medium" placeholder="Enter diagnostic query (e.g., Provincial gender gap analysis)..." value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSend()} disabled={loading} />
                                     <button onClick={handleSend} disabled={loading} className="bg-[#0f172a] text-white px-8 rounded-2xl hover:bg-[#d97706] transition-all flex items-center justify-center shadow-lg active:scale-95 disabled:opacity-50">
                                         <Icons.Zap />
                                     </button>
@@ -294,7 +328,7 @@
                 <h4 className="font-bold text-slate-900 text-xl mb-1">{title}</h4>
                 <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-6">{type}</p>
                 <div className="flex justify-between items-center">
-                    <span className="text-[10px] font-black px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg border border-emerald-100 uppercase tracking-widest">Synced</span>
+                    <span className="text-[10px] font-black px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg border border-emerald-100 uppercase tracking-widest">Active</span>
                     <span className="text-[10px] text-slate-300 font-bold">{meta}</span>
                 </div>
             </div>
