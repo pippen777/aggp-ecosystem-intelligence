@@ -113,9 +113,10 @@
             let inTable = false;
             let tableRows = [];
 
-            // Helper to handle bold and source tagging inside any text block
+            // Robust inline processor to handle bold and sources across all components
             const processInline = (line) => {
                 if (!line) return "";
+                // Handle bolding (**text**) and specific research source tags
                 const parts = line.split(/(\*\*.*?\*\*|GEM \d{4}\/\d{2}|StatsSA QLFS Q\d)/g);
                 return parts.map((p, j) => {
                     if (p.startsWith('**') && p.endsWith('**')) {
@@ -156,19 +157,19 @@
                     return;
                 } else if (inTable) { flushTable(i); }
 
-                // Section Parsing (Robust check for spaces or missing spaces)
+                // Section Parsing
                 if (trimmed.startsWith('##')) {
-                    const title = trimmed.replace(/^##\s*/, '');
+                    const title = trimmed.replace(/^##+\s*/, '');
                     content.push(<h2 key={i}>{processInline(title)}</h2>);
                 } else if (trimmed.startsWith('###')) {
-                    const title = trimmed.replace(/^###\s*/, '');
+                    const title = trimmed.replace(/^###+\s*/, '');
                     content.push(<h3 key={i}><Icons.Briefcase /> {processInline(title)}</h3>);
                 } else if (trimmed.startsWith('####')) {
-                    const title = trimmed.replace(/^####\s*/, '');
+                    const title = trimmed.replace(/^####+\s*/, '');
                     content.push(<h4 key={i}>{processInline(title)}</h4>);
                 } 
-                // Special Strategic Labels (Intervention, KPI, Focus Area, Deliverable)
-                else if (/^(Intervention|KPI|Deliverable|Focus Area|Objective):/i.test(trimmed)) {
+                // Enhanced Impact Card Parsing (handles Intervention, KPI, Deliverable, Label, Mechanism, etc.)
+                else if (/^(Intervention|KPI|Deliverable|Focus Area|Objective|Label|Mechanism|Feature|Outcome|Infrastructure|Technology|Incentive|Program|Process|Barrier Reduction|Platform|Action|Financial Tool):/i.test(trimmed)) {
                     const [label, ...valParts] = trimmed.split(':');
                     const val = valParts.join(':').trim();
                     content.push(
@@ -236,7 +237,7 @@
 
             if (!isAuthorized) {
                 return (
-                    <div className="h-screen bg-[#0f172a] flex items-center justify-center p-6 text-center">
+                    <div className="h-screen bg-[#0f172a] flex items-center justify-center p-6 text-center font-sans">
                         <div className="max-w-md w-full space-y-8 animate-fade-in">
                             <div className="inline-block bg-[#d97706] p-4 rounded-2xl shadow-2xl mb-4"><Icons.Zap /></div>
                             <h1 className="text-white text-3xl font-serif">Entrepreneur Knowledge<br/>Ecosystem</h1>
@@ -348,7 +349,7 @@
                         {activeTab === 'chat' && (
                             <div className="p-8 bg-white border-t border-slate-100 shadow-[0_-8px_16px_rgba(0,0,0,0.03)]">
                                 <div className="max-w-4xl mx-auto flex gap-4">
-                                    <input className="flex-1 border border-slate-200 rounded-[1.25rem] py-5 px-8 focus:ring-4 focus:ring-[#d97706]/10 outline-none transition-all shadow-sm text-slate-800 placeholder:text-slate-400 font-medium" placeholder="Enter diagnostic query (e.g., Provincial necessity-gap analysis)..." value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSend()} disabled={loading} />
+                                    <input className="flex-1 border border-slate-200 rounded-[1.25rem] py-5 px-8 focus:ring-4 focus:ring-[#d97706]/10 outline-none transition-all shadow-sm text-slate-800 placeholder:text-slate-400 font-medium" placeholder="Enter diagnostic query (e.g., Sectoral leapfrog strategy)..." value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSend()} disabled={loading} />
                                     <button onClick={handleSend} disabled={loading} className="bg-[#0f172a] text-white px-8 rounded-[1.25rem] hover:bg-[#d97706] transition-all flex items-center justify-center shadow-lg active:scale-95 disabled:opacity-50 group">
                                         <Icons.Zap />
                                     </button>
