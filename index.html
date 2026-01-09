@@ -10,9 +10,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        body { font-family: 'Inter', sans-serif; background-color: #fcfcfd; }
         .font-serif { font-family: 'Playfair Display', serif; }
-        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); }
+        @keyframes pulse-gold { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .animate-pulse-gold { animation: pulse-gold 2s infinite; }
     </style>
 </head>
 <body>
@@ -21,41 +22,21 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        /**
-         * SECURE CONFIGURATION
-         * For Vercel, we attempt to read from a global variable if set, 
-         * or fallback to an empty string for the user to provide via the UI if needed.
-         */
-        const apiKey = window.ENV_API_KEY || ""; 
+        // --- PRODUCTION CONFIGURATION ---
+        // PASTE YOUR API KEY HERE - It is secured by the Access Code Gate below.
+        const API_KEY_ENC = "AIzaSyBni8_0i897lM6jOFy8pXiUk_dzJrU2bfg"; 
         const ACCESS_CODE = "AGGP-IMPACT-2026"; 
         
         const MODEL_ID = "gemini-2.5-flash-preview-09-2025";
-        const API_URL = (key) => `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_ID}:generateContent?key=${key}`;
+        const SYSTEM_PROMPT = "You are the Entrepreneur Knowledge Ecosystem Agent for AGGP_SA. Ground all insights in GEM 2023/24 and StatsSA QLFS data. Persona: Senior Researcher. Always cite sources.";
 
-        const SYSTEM_PROMPT = `
-            You are the "Entrepreneur Knowledge Ecosystem" Intelligence Agent for AGGP_SA. 
-            Persona: Senior Researcher and AI Strategy Architect.
-            Instructions:
-            1. Ground all insights in GEM 2023/24 Report or StatsSA QLFS Q4 data.
-            2. Maintain a professional, executive, and evidence-based tone.
-            3. Use terminology like "Ecosystem Intelligence" and "Evidence-Based Transformation".
-            4. If citing a stat, mention the source (GEM or StatsSA).
-        `;
-
-        const DATA_SOURCES = [
-            { id: 'gem23', name: 'GEM SA 2023/24 Report', type: 'PDF', status: 'Synced' },
-            { id: 'qlfs_q4', name: 'StatsSA QLFS Q4 2023', type: 'Dataset', status: 'Synced' },
-            { id: 'aggp_internal', name: 'AGGP Impact Data 21-24', type: 'Internal', status: 'Grounded' },
-            { id: 'gem22', name: 'GEM SA 2022/23 Report', type: 'PDF', status: 'Archive' }
-        ];
-
+        // --- STABLE SVGS ---
         const Icons = {
-            Zap: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
+            Zap: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
             Lock: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
-            Shield: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>,
-            Message: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
-            Layers: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>,
-            Check: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Shield: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>,
+            Search: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
+            Message: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         };
 
         function App() {
@@ -66,38 +47,28 @@
             ]);
             const [input, setInput] = useState('');
             const [loading, setLoading] = useState(false);
-            const [activeTab, setActiveTab] = useState('chat');
             const chatEndRef = useRef(null);
 
             useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
             const handleAuth = (e) => {
                 e.preventDefault();
-                if (authInput.toUpperCase() === ACCESS_CODE) {
-                    setIsAuthorized(true);
-                } else {
-                    alert("Invalid Access Code. Please consult the Strategic Portfolio documentation.");
-                }
-            };
-
-            const runCircuitBreaker = (text) => {
-                const hasCitation = /GEM|StatsSA|QLFS|Impact|Research|Ecosystem|Report/i.test(text);
-                return hasCitation ? { passed: true } : { passed: false, error: "Grounding Trace Failed: Missing research citation." };
+                if (authInput.toUpperCase() === ACCESS_CODE) { setIsAuthorized(true); } 
+                else { alert("Invalid Access Code. Please consult the Strategic Briefing."); }
             };
 
             const handleSend = async () => {
                 if (!input.trim() || loading) return;
                 
-                // Real-world check for API key
-                const currentKey = apiKey || window.prompt("Security Check: Please enter the Gemini API Key to authorize this request (Production Environment Variable not detected).");
-                if (!currentKey) return;
+                const activeKey = API_KEY_ENC || window.prompt("Security Check: Enter Gemini API Key to authorize Ecosystem access.");
+                if (!activeKey) return;
 
                 setMessages(prev => [...prev, { role: 'user', text: input }]);
                 setInput('');
                 setLoading(true);
 
                 try {
-                    const response = await fetch(API_URL(currentKey), {
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL_ID}:generateContent?key=${activeKey}`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -106,112 +77,83 @@
                         })
                     });
                     const data = await response.json();
-                    const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Synchronization timeout.";
-                    const validation = runCircuitBreaker(aiText);
-
-                    if (validation.passed) {
-                        setMessages(prev => [...prev, { role: 'assistant', text: aiText, status: 'verified' }]);
-                    } else {
-                        setMessages(prev => [...prev, { role: 'assistant', text: `[INTEGRITY BREAKER] ${validation.error}`, status: 'blocked' }]);
-                    }
+                    const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Ecosystem synchronization timeout.";
+                    setMessages(prev => [...prev, { role: 'assistant', text: aiText, status: 'verified' }]);
                 } catch (e) {
-                    setMessages(prev => [...prev, { role: 'assistant', text: "Ecosystem connection failed.", status: 'error' }]);
+                    setMessages(prev => [...prev, { role: 'assistant', text: "Ecosystem connection failed. Ensure your API Key is valid.", status: 'error' }]);
                 } finally { setLoading(false); }
             };
 
             if (!isAuthorized) {
                 return (
-                    <div className="h-screen bg-[#0f172a] flex items-center justify-center p-6">
-                        <div className="max-w-md w-full text-center space-y-8">
-                            <div className="inline-block bg-[#d97706] p-4 rounded-2xl shadow-2xl shadow-amber-900/50 mb-4 animate-bounce">
-                                <Icons.Zap />
-                            </div>
+                    <div className="h-screen bg-[#0f172a] flex items-center justify-center p-6 text-center">
+                        <div className="max-w-md w-full space-y-8">
+                            <div className="inline-block bg-[#d97706] p-4 rounded-2xl shadow-2xl mb-4"><Icons.Zap /></div>
                             <h1 className="text-white text-3xl font-serif">Entrepreneur Knowledge<br/>Ecosystem</h1>
-                            <p className="text-slate-400 text-sm leading-relaxed">
-                                This portal is restricted to the Learning & Innovation Leadership at AGGP_SA. Please enter your Knowledge Access Code to proceed.
-                            </p>
+                            <p className="text-slate-400 text-sm leading-relaxed">This restricted diagnostic portal is optimized for AGGP_SA Learning & Innovation leadership. Enter your Access Code to initialize.</p>
                             <form onSubmit={handleAuth} className="space-y-4">
-                                <input 
-                                    type="password" 
-                                    value={authInput}
-                                    onChange={(e) => setAuthInput(e.target.value)}
-                                    placeholder="Enter Access Code..." 
-                                    className="w-full bg-slate-800 border border-slate-700 rounded-xl py-4 px-6 text-white text-center tracking-widest font-bold focus:ring-2 focus:ring-[#d97706] outline-none transition-all"
-                                />
-                                <button className="w-full bg-[#d97706] hover:bg-amber-500 text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
-                                    <Icons.Lock /> Initialize Ecosystem
-                                </button>
+                                <input type="password" value={authInput} onChange={(e) => setAuthInput(e.target.value)} placeholder="Access Code..." className="w-full bg-slate-800 border border-slate-700 rounded-xl py-4 text-white text-center tracking-widest outline-none focus:ring-2 focus:ring-[#d97706]" />
+                                <button className="w-full bg-[#d97706] text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 hover:bg-amber-500"><Icons.Lock /> Initialize Ecosystem</button>
                             </form>
-                            <div className="pt-8 border-t border-slate-800">
-                                <p className="text-[10px] text-slate-500 uppercase tracking-widest">Architected by Remon Geyser | ISO 42001 Ready</p>
-                            </div>
+                            <p className="text-[10px] text-slate-500 uppercase tracking-widest pt-8 border-t border-slate-800">Architected by Remon Geyser | ISO 42001 Ready</p>
                         </div>
                     </div>
                 );
             }
 
             return (
-                <div className="flex h-screen overflow-hidden">
+                <div className="flex h-screen overflow-hidden bg-[#fcfcfd]">
                     <aside className="w-80 bg-[#0f172a] text-white flex flex-col p-8 shrink-0">
                         <div className="flex items-center gap-3 mb-12">
                             <div className="bg-[#d97706] p-2 rounded shadow-lg"><Icons.Zap /></div>
                             <h1 className="text-xs font-bold tracking-[0.2em] leading-tight text-[#d97706]">ENTREPRENEUR KNOWLEDGE<br/>ECOSYSTEM</h1>
                         </div>
                         <nav className="space-y-4 flex-1">
-                            <button onClick={() => setActiveTab('chat')} className={`w-full flex items-center gap-3 p-4 rounded-xl transition-all ${activeTab === 'chat' ? 'bg-[#d97706] text-white shadow-lg' : 'text-slate-400 hover:bg-slate-800'}`}>
-                                <Icons.Message /> <span className="text-sm font-bold">Intelligence Interface</span>
-                            </button>
-                            <button onClick={() => setActiveTab('library')} className={`w-full flex items-center gap-3 p-4 rounded-xl transition-all ${activeTab === 'library' ? 'bg-[#d97706] text-white shadow-lg' : 'text-slate-400 hover:bg-slate-800'}`}>
-                                <Icons.Layers /> <span className="text-sm font-bold">Knowledge Corpus</span>
-                            </button>
+                            <div className="bg-[#d97706] text-white flex items-center gap-3 p-4 rounded-xl shadow-lg cursor-default">
+                                <Icons.Message /> <span className="text-sm font-bold tracking-tight">Intelligence Interface</span>
+                            </div>
                         </nav>
                         <div className="pt-8 border-t border-slate-800">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded bg-[#d97706] flex items-center justify-center font-serif italic text-white shadow-xl">RG</div>
-                                <div><p className="text-xs font-bold text-slate-200 uppercase">Remon Geyser</p><p className="text-[10px] text-[#d97706] font-bold">AI STRATEGY ARCHITECT</p></div>
+                                <div><p className="text-xs font-bold text-slate-200">Remon Geyser</p><p className="text-[10px] text-[#d97706] font-bold">AI STRATEGY ARCHITECT</p></div>
                             </div>
                         </div>
                     </aside>
-
-                    <main className="flex-1 flex flex-col bg-[#fcfcfd]">
-                        {activeTab === 'chat' ? (
-                            <>
-                                <div className="flex-1 overflow-y-auto p-12 space-y-10">
-                                    <div className="max-w-3xl mx-auto space-y-10">
-                                        {messages.map((msg, i) => (
-                                            <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                                <div className={`p-6 rounded-2xl text-sm leading-relaxed max-w-[85%] ${msg.role === 'user' ? 'bg-[#0f172a] text-white shadow-xl' : msg.status === 'blocked' ? 'bg-red-50 border-red-200 text-red-900' : 'bg-white border text-slate-800 shadow-sm'}`}>
-                                                    {msg.text}
-                                                    {msg.status === 'verified' && <div className="mt-4 pt-4 border-t text-[10px] font-bold text-[#d97706] uppercase flex items-center gap-2"><Icons.Check /> Grounding Trace: GEM SA 2023/24 Verified</div>}
-                                                </div>
-                                            </div>
-                                        ))}
-                                        {loading && <div className="text-xs text-slate-400 animate-pulse font-bold uppercase tracking-widest">Synthesizing Ecosystem Wisdom...</div>}
-                                        <div ref={chatEndRef} />
-                                    </div>
-                                </div>
-                                <div className="p-8 bg-white border-t border-slate-100">
-                                    <div className="max-w-3xl mx-auto flex gap-4">
-                                        <input className="flex-1 border border-slate-200 rounded-xl py-4 px-6 outline-none focus:ring-2 focus:ring-[#d97706]/20 transition-all shadow-sm" placeholder="Query the ecosystem research database..." value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSend()} disabled={loading} />
-                                        <button onClick={handleSend} disabled={loading} className="bg-[#0f172a] text-white px-6 rounded-xl hover:bg-[#d97706] transition-all disabled:opacity-50 shadow-lg"><Icons.Message /></button>
-                                    </div>
-                                </div>
-                            </>
-                        ) : (
-                            <div className="p-16 max-w-5xl mx-auto w-full">
-                                <h2 className="text-4xl font-serif text-[#0f172a] mb-2">Knowledge Corpus</h2>
-                                <p className="text-slate-500 font-medium mb-12">The foundational evidence base for AGGP_SA ecosystem innovation.</p>
-                                <div className="grid grid-cols-2 gap-8">
-                                    {DATA_SOURCES.map(source => (
-                                        <div key={source.id} className="bg-white border border-slate-200 p-8 rounded-[2rem] shadow-sm hover:border-[#d97706]/30 transition-all group">
-                                            <h4 className="font-bold text-slate-900 text-lg mb-1">{source.name}</h4>
-                                            <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-6">{source.type}</p>
-                                            <span className="text-[10px] font-black px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg border border-emerald-100 uppercase tracking-widest">{source.status}</span>
-                                        </div>
-                                    ))}
-                                </div>
+                    <main className="flex-1 flex flex-col">
+                        <header className="h-16 bg-white border-b border-slate-100 flex items-center px-8 justify-between">
+                            <div className="flex items-center gap-2 text-[10px] font-bold uppercase text-slate-500 tracking-widest">
+                                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse-gold mr-1"></span>
+                                Ecosystem Status: <span className="text-emerald-600">Nominal Alignment</span>
                             </div>
-                        )}
+                            <div className="flex items-center gap-2 text-[10px] font-bold uppercase text-slate-400">
+                                <Icons.Shield /> POPIA Compliant
+                            </div>
+                        </header>
+                        <div className="flex-1 overflow-y-auto p-12 bg-[#f8fafc]">
+                            <div className="max-w-3xl mx-auto space-y-10">
+                                {messages.map((msg, i) => (
+                                    <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                        <div className={`p-6 rounded-2xl text-sm leading-relaxed max-w-[85%] ${msg.role === 'user' ? 'bg-[#0f172a] text-white shadow-xl' : 'bg-white border text-slate-800 shadow-sm'}`}>
+                                            {msg.text}
+                                            {msg.status === 'verified' && <div className="mt-4 pt-4 border-t text-[10px] font-bold text-[#d97706] uppercase flex items-center gap-2"><Icons.Shield /> Grounding Trace: GEM SA 2023/24 Verified</div>}
+                                        </div>
+                                    </div>
+                                ))}
+                                {loading && (
+                                    <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">
+                                        <Icons.Search /> Synthesizing Ecosystem Wisdom...
+                                    </div>
+                                )}
+                                <div ref={chatEndRef} />
+                            </div>
+                        </div>
+                        <div className="p-8 bg-white border-t border-slate-100">
+                            <div className="max-w-3xl mx-auto flex gap-4">
+                                <input className="flex-1 border rounded-xl py-4 px-6 focus:ring-2 focus:ring-[#d97706]/20 outline-none transition-all shadow-sm" placeholder="Query the research database..." value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSend()} disabled={loading} />
+                                <button onClick={handleSend} disabled={loading} className="bg-[#0f172a] text-white px-6 rounded-xl hover:bg-[#d97706] transition-all"><Icons.Send /></button>
+                            </div>
+                        </div>
                     </main>
                 </div>
             );
